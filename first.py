@@ -21,7 +21,7 @@ tasks = [
 
 from flask import abort
 
-@app.route('/todo/api/v1.0/tasks/<int:task_id>', methods=['GET'])
+@app.route('/tasks/<int:task_id>', methods=['GET'])
 def get_task(task_id):
     task = filter(lambda t: t['id'] == task_id, tasks)
     len = 0;
@@ -31,7 +31,7 @@ def get_task(task_id):
         abort(404)
     return jsonify({'task': l })
 
-@app.route('/todo/api/v1.0/tasks', methods=['GET'])
+@app.route('/tasks', methods=['GET'])
 def get_tasks():
     return jsonify({'tasks': tasks})
 
