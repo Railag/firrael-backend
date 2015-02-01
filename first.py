@@ -35,5 +35,9 @@ def get_task(task_id):
 def get_tasks():
     return jsonify({'tasks': tasks})
 
+@app.route('/', methods=['GET'])
+def get_default_tasks():
+    return jsonify({'tasks': tasks})
+
 
 app.run(host='0.0.0.0', debug=True)
