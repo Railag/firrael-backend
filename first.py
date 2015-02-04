@@ -1,19 +1,43 @@
 #!flask/bin/python
 from flask import Flask, jsonify
 
+
+import cherrypy
+from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
+from ws4py.websocket import EchoWebSocket
+
+cherrypy.config.update({'server.socket_port': 9000})
+WebSocketPlugin(cherrypy.engine).subscribe()
+cherrypy.tools.websocket = WebSocketTool()
+
+import codecs
+
+class Root(object):
+    @cherrypy.expose
+    def index(self):
+        return codecs.open("index.html", 'r', 'utf-8')
+
+    @cherrypy.expose
+    def ws(self):
+        # you can access the class instance through
+        handler = cherrypy.request.ws_handler
+
+cherrypy.quickstart(Root(), '/', config={'/ws': {'tools.websocket.on': True,
+                                                 'tools.websocket.handler_cls': EchoWebSocket}})
+
 app = Flask(__name__)
 
 tasks = [
     {
         'id': 1,
         'title': u'Buy groceries',
-        'description': u'Milk, Cheese, Pizza, Fruit, Tylenol', 
+        'description': u'Milk, Cheese, Pizza, Fruit, Tylenol',
         'done': False
     },
     {
         'id': 2,
         'title': u'Learn Python',
-        'description': u'Need to find a good Python tutorial on the web', 
+        'description': u'Need to find a good Python tutorial on the web',
         'done': False
     }
 ]
@@ -23,13 +47,16 @@ from flask import abort
 
 @app.route('/tasks/<int:task_id>', methods=['GET'])
 def get_task(task_id):
-    task = filter(lambda t: t['id'] == task_id, tasks)
-    len = 0;
+    task = list(filter(lambda t: t['id'] == task_id, tasks))
+    length = 0;
     for l in task:
-        len = len + 1;
-    if len == 0:
+        length += 1;
+    if length == 0:
         abort(404)
-    return jsonify({'task': l })
+    print("Task id is %d" % task_id)
+    print(task)
+    print(task[0])
+    return jsonify({'task': task[0]})
 
 @app.route('/tasks', methods=['GET'])
 def get_tasks():
